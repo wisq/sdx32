@@ -1,18 +1,32 @@
 defmodule Sdx32 do
-  @moduledoc """
-  Documentation for `Sdx32`.
-  """
+  use Application
+  require Logger
 
-  @doc """
-  Hello world.
+  alias Sdx32.Parameters
 
-  ## Examples
+  @params_from Application.compile_env!(:sdx32, :params_from)
 
-      iex> Sdx32.hello()
-      :world
+  def start(_type, _args) do
+    children = children(@params_from)
+    Logger.info("Sdx32 starting ...")
+    Supervisor.start_link(children, strategy: :one_for_one, name: Sdx32.Supervisor)
+  end
 
-  """
-  def hello do
-    :world
+  defp children(:none), do: []
+
+  defp children({:file, file}) do
+    File.read!(file)
+    |> Parameters.from_json()
+    |> children_with_params()
+  end
+
+  defp children(:argv) do
+    System.argv()
+    |> Parameters.from_args()
+    |> children_with_params()
+  end
+
+  defp children_with_params(%Parameters{} = params) do
+    [{Sdx32.Socket, params: params}]
   end
 end

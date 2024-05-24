@@ -1,42 +1,45 @@
 defmodule Sdx32.Parameters do
-  defstruct(
-    port: nil,
-    plugin_uuid: nil,
-    register_event: nil,
-    info: nil
-  )
+  @enforce_keys [:port, :plugin_uuid, :register_event, :info]
+  defstruct(@enforce_keys)
 
-  def parse_args(["-port", port_str | rest]) do
-    with {:ok, opts} <- parse_args(rest),
-         {port, ""} <- Integer.parse(port_str) do
-      {:ok, %__MODULE__{opts | port: port}}
-    end
+  defp parse_args(["-port", port | rest]) do
+    parse_args(rest)
+    |> Map.put(:port, String.to_integer(port))
   end
 
-  def parse_args(["-pluginUUID", uuid | rest]) do
-    with {:ok, opts} <- parse_args(rest) do
-      {:ok, %__MODULE__{opts | plugin_uuid: uuid}}
-    end
+  defp parse_args(["-pluginUUID", uuid | rest]) do
+    parse_args(rest)
+    |> Map.put(:plugin_uuid, uuid)
   end
 
-  def parse_args(["-registerEvent", event | rest]) do
-    with {:ok, opts} <- parse_args(rest) do
-      {:ok, %__MODULE__{opts | register_event: event}}
-    end
+  defp parse_args(["-registerEvent", event | rest]) do
+    parse_args(rest)
+    |> Map.put(:register_event, event)
   end
 
-  def parse_args(["-info", json | rest]) do
-    with {:ok, opts} <- parse_args(rest),
-         {:ok, info} <- Jason.decode(json) do
-      {:ok, %__MODULE__{opts | info: info}}
-    end
+  defp parse_args(["-info", json | rest]) do
+    parse_args(rest)
+    |> Map.put(:info, Jason.decode!(json))
   end
 
-  def parse_args([]), do: {:ok, %__MODULE__{}}
+  defp parse_args([]), do: %{}
 
-  def to_json(%__MODULE__{} = opts) do
-    opts
+  def from_args(args) do
+    args
+    |> parse_args()
+    |> then(&struct!(__MODULE__, &1))
+  end
+
+  def to_json(%__MODULE__{} = params) do
+    params
     |> Map.from_struct()
     |> Jason.encode!()
+  end
+
+  def from_json(json) do
+    json
+    |> Jason.decode!()
+    |> Enum.map(fn {key, value} -> {String.to_existing_atom(key), value} end)
+    |> then(&struct!(__MODULE__, &1))
   end
 end

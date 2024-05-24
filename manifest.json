@@ -1,49 +1,61 @@
 {
-	"SDKVersion": 2,
-	"Author": "Adrian Irving-Beer",
-	"CodePath": "dev.sh",
-	"Description": "Example description",
-	"Name": "SDX32",
-	"Icon": "actions/template/assets/action",
-	"URL": "https://github.com/wisq/sdx32",
-	"Version": "0.0.1",
-	"Software": {
-		"MinimumVersion": "5.0"
-	},
-	"OS": [
-		{
-			"Platform": "mac",
-			"MinimumVersion": "10.11"
-		},
-		{
-			"Platform": "windows",
-			"MinimumVersion": "10"
-		}
-	],
-	"Category": "Template Plugin",
-	"CategoryIcon": "actions/template/assets/actionimage",
-	"Actions": [
-		{
-			"Icon": "actions/template/assets/actionimage",
-			"Name": "Example Action",
-			"Controllers": ["Keypad", "Encoder"],
-			"Encoder": {
-				"layout": "$B1",
-				"TriggerDescription": {
-					"Rotate": "Describe the rotation",
-					"Push": "Describe the encoder push",
-					"Touch": "Describe the touch",
-					"LongTouch": "Describe the long touch"
-				}
-			},
-			"States": [
-				{
-					"Image": "actions/template/assets/action"
-				}
-			],
-			"Tooltip": "This is an example tooltip",
-			"UUID": "com.elgato.template.action",
-			"PropertyInspectorPath": "actions/template/property-inspector/inspector.html"
-		}
-	]
+  "SDKVersion": 2,
+  "Author": "Adrian Irving-Beer",
+  "CodePath": "dev.sh",
+  "Description": "Example description",
+  "Name": "SDX32",
+  "Icon": "actions/template/assets/action",
+  "URL": "https://github.com/wisq/sdx32",
+  "Version": "0.0.1",
+  "Software": {
+    "MinimumVersion": "5.0"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.11"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Category": "Audio",
+  "CategoryIcon": "actions/template/assets/actionimage",
+  "Actions": [
+    {
+      "Icon": "icons/mute",
+      "Name": "Mute/unmute X32 channel",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "icons/audio_on"
+        },
+        {
+          "Image": "icons/audio_off"
+        }
+      ],
+      "Tooltip": "Mute/unmute a mixer channel",
+      "UUID": "net.wisq.sdx32.mute",
+      "PropertyInspectorPath": "html/mute.html"
+    },
+    {
+      "Icon": "icons/channel",
+      "Name": "Set X32 channel volume",
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "$B1",
+        "TriggerDescription": {
+          "Rotate": "Adjust volume",
+          "Push": "Mute/unmute",
+          "Touch": "Mute/unmute",
+          "LongTouch": "Reset to +0 dB"
+        }
+      },
+      "Tooltip": "Set a mixer channel's volume",
+      "UUID": "net.wisq.sdx32.volume",
+      "PropertyInspectorPath": "html/volume.html"
+    }
+
+  ]
 }

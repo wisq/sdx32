@@ -14,6 +14,7 @@ defmodule Sdx32.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {Sdx32, []},
       extra_applications: [:logger]
     ]
   end
