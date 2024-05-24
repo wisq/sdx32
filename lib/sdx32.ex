@@ -29,6 +29,7 @@ defmodule Sdx32 do
   defp children_with_params(%Parameters{} = params) do
     [
       Sdx32.ActionSupervisor,
+      Sdx32.Mixer.RemoteSupervisor,
       {Sdx32.Socket, params: params}
     ]
   end
