@@ -1,7 +1,15 @@
 defmodule Sdx32.Event do
   require Logger
 
-  alias Sdx32.Action
+  alias Sdx32.{Action, Socket}
+
+  def send(event, context, payload) do
+    Socket.send(%{
+      event: event,
+      context: context,
+      payload: payload
+    })
+  end
 
   def handle_event(%{
         "action" => action,

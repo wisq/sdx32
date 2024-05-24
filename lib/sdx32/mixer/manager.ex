@@ -33,8 +33,6 @@ defmodule Sdx32.Mixer.Manager do
 
   @impl true
   def handle_cast({:register, pid, ip, port}, state) do
-    Process.monitor(pid)
-
     {:noreply,
      state
      |> replace_client(pid, {ip, port})

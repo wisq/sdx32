@@ -2,29 +2,39 @@ defmodule Sdx32.Action.Mute do
   use GenServer
   require Logger
 
+  alias Sdx32.Event
   alias Sdx32.Mixer
   alias X32Remote.Commands.Mixing
 
-  @settings ["mute", "unmute", "toggle"]
+  @poll 1_000
+
+  defmodule State do
+    @enforce_keys [:context, :ip, :channel]
+    defstruct(@enforce_keys)
+  end
+
   @port 10023
+  @button_states %{muted: 1, unmuted: 0}
 
   def start_link(opts) do
-    IO.inspect(opts)
-    GenServer.start_link(__MODULE__, nil, opts)
+    {context, opts} = Keyword.pop!(opts, :context)
+    {payload, opts} = Keyword.pop!(opts, :payload)
+    GenServer.start_link(__MODULE__, {context, payload}, opts)
   end
 
   def cast_event(name, event, payload) do
     GenServer.cast(name, {:event, event, payload})
   end
 
-  def init(payload) do
-    IO.inspect(payload)
+  @impl true
+  def init({context, %{"settings" => %{"mixer_ip" => ip, "channel" => channel}}}) do
     Logger.debug("started")
-    {:ok, nil}
+    {:ok, %State{context: context, ip: ip, channel: channel}, @poll}
   end
 
+  @impl true
   def handle_cast(
-        {:event, "keyDown",
+        {:event, event,
          %{
            "settings" => %{
              "mixer_ip" => ip,
@@ -33,27 +43,64 @@ defmodule Sdx32.Action.Mute do
            }
          }},
         state
-      )
-      when setting in @settings do
-    Mixer.find(ip, @port)
-    |> set_mute(setting, channel)
+      ) do
+    mixer = Mixer.find(ip, @port)
+    state = %State{state | ip: ip, channel: channel}
 
-    {:noreply, state}
-  end
+    case handle_event(event, mixer, setting, state) do
+      {:reply, button_state, state} ->
+        set_button_state(button_state, state.context)
+        {:noreply, state, @poll}
 
-  def handle_cast({:event, event, _payload}, state) do
-    Logger.debug("[#{self() |> inspect()}] Unhandled #{inspect(event)} event")
-
-    {:noreply, state}
-  end
-
-  defp set_mute(pid, "mute", channel), do: Mixing.mute(pid, channel)
-  defp set_mute(pid, "unmute", channel), do: Mixing.unmute(pid, channel)
-
-  defp set_mute(pid, "toggle", channel) do
-    case Mixing.muted?(pid, channel) do
-      true -> Mixing.unmute(pid, channel)
-      false -> Mixing.mute(pid, channel)
+      {:noreply, state} ->
+        {:noreply, state, 0}
     end
+  end
+
+  @impl true
+  def handle_cast({:event, event, _payload}, state) do
+    Logger.debug("[#{self() |> inspect()}] Non-matching #{inspect(event)} frame")
+    {:noreply, state, @poll}
+  end
+
+  @impl true
+  def handle_info(:timeout, state) do
+    case Mixer.find(state.ip, @port) |> Mixing.muted?(state.channel) do
+      true -> :muted
+      false -> :unmuted
+    end
+    |> set_button_state(state.context)
+
+    {:noreply, state, @poll}
+  end
+
+  defp handle_event("keyDown", mixer, "mute", state) do
+    Mixing.mute(mixer, state.channel)
+    {:reply, :muted, state}
+  end
+
+  defp handle_event("keyDown", mixer, "unmute", state) do
+    Mixing.unmute(mixer, state.channel)
+    {:reply, :unmuted, state}
+  end
+
+  defp handle_event("keyDown", mixer, "toggle", state) do
+    case Mixing.muted?(mixer, state.channel) do
+      true -> handle_event("keyDown", mixer, "unmute", state)
+      false -> handle_event("keyDown", mixer, "mute", state)
+    end
+  end
+
+  defp handle_event("keyUp", _, _, state) do
+    {:noreply, state}
+  end
+
+  defp handle_event(event, _, _, state) do
+    Logger.debug("[#{self() |> inspect()}] Unhandled #{inspect(event)} frame")
+    {:noreply, state}
+  end
+
+  defp set_button_state(button_state, context) do
+    Event.send("setState", context, %{state: Map.fetch!(@button_states, button_state)})
   end
 end

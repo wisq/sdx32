@@ -9,7 +9,7 @@ defmodule Sdx32.Action do
 
   def create(action, context, payload) do
     with {:ok, module, name} <- lookup_action(action, context) do
-      ActionSupervisor.start_child(module, name: name, payload: payload)
+      ActionSupervisor.start_child(module, name: name, context: context, payload: payload)
     end
   end
 

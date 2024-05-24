@@ -29,10 +29,12 @@
       "Controllers": ["Keypad"],
       "States": [
         {
-          "Image": "icons/audio_on"
+          "Image": "icons/icons8_speaker_72px",
+          "ShowTitle": false
         },
         {
-          "Image": "icons/audio_off"
+          "Image": "icons/icons8_no_audio_72px",
+          "ShowTitle": false
         }
       ],
       "Tooltip": "Mute/unmute a mixer channel",
