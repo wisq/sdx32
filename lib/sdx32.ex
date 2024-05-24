@@ -30,6 +30,7 @@ defmodule Sdx32 do
     [
       Sdx32.ActionSupervisor,
       Sdx32.Mixer.RemoteSupervisor,
+      Sdx32.Mixer.Manager,
       {Sdx32.Socket, params: params}
     ]
   end
