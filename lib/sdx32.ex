@@ -27,6 +27,9 @@ defmodule Sdx32 do
   end
 
   defp children_with_params(%Parameters{} = params) do
-    [{Sdx32.Socket, params: params}]
+    [
+      Sdx32.ActionSupervisor,
+      {Sdx32.Socket, params: params}
+    ]
   end
 end

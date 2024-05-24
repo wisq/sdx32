@@ -2,6 +2,7 @@ defmodule Sdx32.Socket do
   use WebSockex
 
   alias Sdx32.Parameters
+  alias Sdx32.Event
 
   def start_link(opts) do
     {%Parameters{} = params, opts} = Keyword.pop!(opts, :params)
@@ -18,8 +19,10 @@ defmodule Sdx32.Socket do
   end
 
   def handle_frame({:text, json}, params) do
-    data = Jason.decode!(json)
-    IO.inspect(data)
+    json
+    |> Jason.decode!()
+    |> Event.handle_event()
+
     {:ok, params}
   end
 
