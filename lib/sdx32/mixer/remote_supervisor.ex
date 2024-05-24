@@ -11,38 +11,45 @@ defmodule Sdx32.Mixer.RemoteSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  def start_child(ip, port) do
-    with {:ok, ip_tuple} <- ip |> String.to_charlist() |> :inet.parse_strict_address() do
-      opts = [
-        ip: ip_tuple,
-        port: port,
-        name: super_name(ip, port),
-        client_name: client_name(ip, port),
-        session_name: session_name(ip, port)
-      ]
+  def ensure_started(ip, port) when is_tuple(ip) do
+    prefix = name_prefix(ip, port)
 
-      DynamicSupervisor.start_child(@name, {X32Remote.Supervisor, opts})
+    opts = [
+      ip: ip,
+      port: port,
+      name: super_name(prefix),
+      client_name: client_name(prefix),
+      session_name: session_name(prefix),
+      watcher_name: watcher_name(prefix)
+    ]
+
+    with {:ok, pid} <- DynamicSupervisor.start_child(@name, {X32Remote.Supervisor, opts}) do
+      {:ok, Map.new(opts) |> Map.put(:pid, pid)}
+    else
+      {:error, {:already_started, pid}} ->
+        {:ok, Map.new(opts) |> Map.put(:pid, pid)}
     end
   end
 
   def terminate_child(ip, port) do
-    case whereis(ip, port, :super) do
+    case whereis(ip, port) do
       nil -> {:error, :not_found}
       pid when is_pid(pid) -> DynamicSupervisor.terminate_child(@name, pid)
     end
   end
 
-  def whereis(ip, port, type \\ :session)
-  def whereis(ip, port, :super), do: super_name(ip, port) |> Process.whereis()
-  def whereis(ip, port, :client), do: client_name(ip, port) |> Process.whereis()
-  def whereis(ip, port, :session), do: session_name(ip, port) |> Process.whereis()
+  defp whereis(ip, port), do: name_prefix(ip, port) |> super_name() |> Process.whereis()
 
-  defp super_name(ip, port), do: name_prefix(ip, port) |> Module.concat(Supervisor)
-  defp client_name(ip, port), do: name_prefix(ip, port) |> Module.concat(Client)
-  defp session_name(ip, port), do: name_prefix(ip, port) |> Module.concat(Session)
+  defp super_name(prefix), do: Module.concat(prefix, Supervisor)
+  defp client_name(prefix), do: Module.concat(prefix, Client)
+  defp session_name(prefix), do: Module.concat(prefix, Session)
+  defp watcher_name(prefix), do: Module.concat(prefix, Watcher)
 
-  defp name_prefix(ip, port) do
-    ip_str = ip |> String.replace(~r/[^0-9]+/, "_")
+  defp name_prefix(ip, port) when is_tuple(ip) do
+    ip_str =
+      ip
+      |> Tuple.to_list()
+      |> Enum.join("_")
 
     Module.concat(
       Sdx32.Mixer,

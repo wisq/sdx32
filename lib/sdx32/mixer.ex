@@ -1,16 +1,10 @@
 defmodule Sdx32.Mixer do
   alias Sdx32.Mixer.{Manager, RemoteSupervisor}
 
-  def find(ip, port) do
+  @default_port 10023
+
+  def ensure_started(ip, port \\ @default_port) when is_tuple(ip) do
     Manager.register(self(), ip, port)
-
-    case RemoteSupervisor.whereis(ip, port) do
-      pid when is_pid(pid) ->
-        pid
-
-      nil ->
-        Manager.wait()
-        RemoteSupervisor.whereis(ip, port)
-    end
+    RemoteSupervisor.ensure_started(ip, port)
   end
 end
