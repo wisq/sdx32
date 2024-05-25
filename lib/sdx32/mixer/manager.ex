@@ -98,8 +98,7 @@ defmodule Sdx32.Mixer.Manager do
     mixers
     |> Map.get_and_update(ip_port, fn
       nil ->
-        result = RemoteSupervisor.start_child(ip, port)
-        Logger.debug("Launching new mixer at #{inspect(ip_port)}: #{inspect(result)}")
+        Logger.debug("Registered new mixer at #{inspect(ip_port)}")
         {nil, MapSet.new([pid])}
 
       set ->
