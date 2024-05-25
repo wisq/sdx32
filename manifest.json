@@ -45,6 +45,12 @@
       "Icon": "icons/channel",
       "Name": "Set X32 channel volume",
       "Controllers": ["Encoder"],
+      "States": [
+        {
+          "Image": "icons/icons8_speaker_72px",
+          "ShowTitle": false
+        }
+      ],
       "Encoder": {
         "layout": "$B1",
         "TriggerDescription": {
@@ -58,6 +64,5 @@
       "UUID": "net.wisq.sdx32.volume",
       "PropertyInspectorPath": "html/volume.html"
     }
-
   ]
 }

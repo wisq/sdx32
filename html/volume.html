@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- ex: sw=4
+-->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Property Inspector</title>
+    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdtools.common.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+	<div class="sdpi-item">
+	    <div class="sdpi-item-label">Mixer IP</div>
+	    <input class="sdProperty" id="mixer_ip" oninput="setSettings()">
+	</div>
+
+	<div class="sdpi-item">
+	    <div class="sdpi-item-label">Channel</div>
+	    <select class="sdProperty" id="channel" oninput="setSettings()">
+		<option value="main/st">Main LR</option>
+		<option value="main/m">Main C</option>
+		<option value="ch/01">Ch 1</option>
+		<option value="ch/02">Ch 2</option>
+		<option value="ch/03">Ch 3</option>
+		<option value="ch/04">Ch 4</option>
+		<option value="ch/05">Ch 5</option>
+		<option value="ch/06">Ch 6</option>
+		<option value="ch/07">Ch 7</option>
+		<option value="ch/08">Ch 8</option>
+		<option value="ch/09">Ch 9</option>
+		<option value="ch/10">Ch 10</option>
+		<option value="ch/11">Ch 11</option>
+		<option value="ch/12">Ch 12</option>
+		<option value="ch/13">Ch 13</option>
+		<option value="ch/14">Ch 14</option>
+		<option value="ch/15">Ch 15</option>
+		<option value="ch/16">Ch 16</option>
+		<option value="ch/17">Ch 17</option>
+		<option value="ch/18">Ch 18</option>
+		<option value="ch/19">Ch 19</option>
+		<option value="ch/20">Ch 20</option>
+		<option value="ch/21">Ch 21</option>
+		<option value="ch/22">Ch 22</option>
+		<option value="ch/23">Ch 23</option>
+		<option value="ch/24">Ch 24</option>
+		<option value="ch/25">Ch 25</option>
+		<option value="ch/26">Ch 26</option>
+		<option value="ch/27">Ch 27</option>
+		<option value="ch/28">Ch 28</option>
+		<option value="ch/29">Ch 29</option>
+		<option value="ch/30">Ch 30</option>
+		<option value="ch/31">Ch 31</option>
+		<option value="ch/32">Ch 32</option>
+		<option value="bus/01">Bus 1</option>
+		<option value="bus/02">Bus 2</option>
+		<option value="bus/03">Bus 3</option>
+		<option value="bus/04">Bus 4</option>
+		<option value="bus/05">Bus 5</option>
+		<option value="bus/06">Bus 6</option>
+		<option value="bus/07">Bus 7</option>
+		<option value="bus/08">Bus 8</option>
+		<option value="bus/09">Bus 9</option>
+		<option value="bus/10">Bus 10</option>
+		<option value="bus/11">Bus 11</option>
+		<option value="bus/12">Bus 12</option>
+		<option value="bus/13">Bus 13</option>
+		<option value="bus/14">Bus 14</option>
+		<option value="bus/15">Bus 15</option>
+		<option value="bus/16">Bus 16</option>
+		<option value="mtx/01">Matrix 1</option>
+		<option value="mtx/02">Matrix 2</option>
+		<option value="mtx/03">Matrix 3</option>
+		<option value="mtx/04">Matrix 4</option>
+		<option value="mtx/05">Matrix 5</option>
+		<option value="mtx/06">Matrix 6</option>
+		<option value="auxin/01">Aux In 1</option>
+		<option value="auxin/02">Aux In 2</option>
+		<option value="auxin/03">Aux In 3</option>
+		<option value="auxin/04">Aux In 4</option>
+		<option value="auxin/05">Aux In 5</option>
+		<option value="auxin/06">Aux In 6</option>
+		<option value="auxin/07">Aux In 7</option>
+		<option value="auxin/08">Aux In 8</option>
+		<option value="fxrtn/01">FX 1L</option>
+		<option value="fxrtn/02">FX 1R</option>
+		<option value="fxrtn/03">FX 2L</option>
+		<option value="fxrtn/04">FX 2R</option>
+		<option value="fxrtn/05">FX 3L</option>
+		<option value="fxrtn/06">FX 3R</option>
+		<option value="fxrtn/07">FX 4L</option>
+		<option value="fxrtn/08">FX 4R</option>
+	    </select>
+	</div>
+
+    </div>
+</body>
+</html>
