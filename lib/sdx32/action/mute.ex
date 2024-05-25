@@ -41,7 +41,13 @@ defmodule Sdx32.Action.Mute do
   def init({context, %{"settings" => settings}}) do
     with {:ok, ip, channel, set_to} <- parse_settings(settings) do
       {:ok, %{session_name: mixer, watcher_name: watcher}} = Mixer.ensure_started(ip)
-      {:ok, sub} = Subscription.start_link(watcher: watcher, command: &Mixing.muted?(&1, channel))
+
+      {:ok, sub} =
+        Subscription.start_link(
+          watcher: watcher,
+          tag: :mute,
+          command: &Mixing.muted?(&1, channel)
+        )
 
       state = %State{
         context: context,
@@ -77,8 +83,8 @@ defmodule Sdx32.Action.Mute do
   @impl true
   def handle_events(events, _from, state) do
     case events |> List.last() do
-      true -> :muted
-      false -> :unmuted
+      {:mute, true} -> :muted
+      {:mute, false} -> :unmuted
     end
     |> then(fn new_mute_state ->
       set_button_state(new_mute_state, state.context)

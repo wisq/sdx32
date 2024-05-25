@@ -28,14 +28,8 @@
       "Name": "Mute/unmute X32 channel",
       "Controllers": ["Keypad"],
       "States": [
-        {
-          "Image": "icons/icons8_speaker_72px",
-          "ShowTitle": false
-        },
-        {
-          "Image": "icons/icons8_no_audio_72px",
-          "ShowTitle": false
-        }
+        { "Image": "icons/icons8_speaker_72px" },
+        { "Image": "icons/icons8_no_audio_72px" }
       ],
       "Tooltip": "Mute/unmute a mixer channel",
       "UUID": "net.wisq.sdx32.mute",
@@ -46,10 +40,7 @@
       "Name": "Set X32 channel volume",
       "Controllers": ["Encoder"],
       "States": [
-        {
-          "Image": "icons/icons8_speaker_72px",
-          "ShowTitle": false
-        }
+        { "Image": "icons/icons8_speaker_72px" }
       ],
       "Encoder": {
         "layout": "$B1",
