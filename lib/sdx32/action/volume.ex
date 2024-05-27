@@ -69,7 +69,7 @@ defmodule Sdx32.Action.Volume do
   end
 
   @impl true
-  def handle_cast({:event, event, _}, state) do
+  def handle_cast({:action, event, _}, state) do
     Logger.debug("[#{self() |> inspect()}] Non-matching #{inspect(event)} frame")
     {:noreply, [], state}
   end
