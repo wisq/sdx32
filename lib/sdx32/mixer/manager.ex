@@ -94,7 +94,7 @@ defmodule Sdx32.Mixer.Manager do
     end
   end
 
-  defp add_mixer_client(mixers, {ip, port} = ip_port, pid) do
+  defp add_mixer_client(mixers, ip_port, pid) do
     mixers
     |> Map.get_and_update(ip_port, fn
       nil ->

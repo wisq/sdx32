@@ -15,6 +15,7 @@ defmodule Sdx32.Action.Volume do
       ip: nil,
       channel: nil,
       set_to: nil,
+      subscriptions: [],
       mute_state: nil,
       fader_state: nil
     )
@@ -33,27 +34,12 @@ defmodule Sdx32.Action.Volume do
   @impl true
   def init({context, %{"settings" => settings}}) do
     with {:ok, ip, channel} <- parse_settings(settings) do
-      {:ok, %{session_name: mixer, watcher_name: watcher}} = Mixer.ensure_started(ip)
-
-      subs =
-        [
-          mute: &Mixing.muted?(&1, channel),
-          fader: &Mixing.get_fader(&1, channel)
-        ]
-        |> Enum.map(fn {tag, fun} ->
-          {:ok, sub} = Subscription.start_link(watcher: watcher, tag: tag, command: fun)
-          sub
-        end)
-
-      state = %State{
-        context: context,
-        mixer: mixer,
-        ip: ip,
-        channel: channel
-      }
+      state =
+        %State{context: context}
+        |> subscribe_to_mixer(ip, channel)
 
       Logger.debug("starting with #{inspect(state)}")
-      {:consumer, state, subscribe_to: subs}
+      {:consumer, state}
     else
       _ ->
         {:consumer, %State{context: context}}
@@ -61,8 +47,8 @@ defmodule Sdx32.Action.Volume do
   end
 
   @impl true
-  def handle_cast({:action, event, %{"settings" => settings} = payload} = cast, state) do
-    state = update_settings(settings, state, cast)
+  def handle_cast({:action, event, %{"settings" => settings} = payload}, state) do
+    state = update_settings(settings, state)
 
     handle_action(event, payload, state)
     {:noreply, [], state}
@@ -138,6 +124,26 @@ defmodule Sdx32.Action.Volume do
     end
   end
 
+  defp subscribe_to_mixer(state, ip, channel) do
+    state.subscriptions |> Enum.each(&GenStage.stop(&1))
+
+    {:ok, %{session_name: mixer, watcher_name: watcher}} = Mixer.ensure_started(ip)
+
+    subs =
+      [
+        mute: &Mixing.muted?(&1, channel),
+        fader: &Mixing.get_fader(&1, channel)
+      ]
+      |> Enum.map(fn {tag, fun} ->
+        {:ok, sub} = Subscription.start_link(watcher: watcher, tag: tag, command: fun)
+        GenStage.async_subscribe(self(), to: sub, cancel: :transient)
+        sub
+      end)
+
+    %State{state | ip: ip, channel: channel, mixer: mixer, subscriptions: subs}
+    |> IO.inspect()
+  end
+
   defp parse_settings(%{"mixer_ip" => ip, "channel" => channel} = settings) do
     with {:ok, ip_tuple} <- ip |> String.to_charlist() |> :inet.parse_strict_address(),
          true <- X32Remote.Types.Channel.channel?(channel) do
@@ -149,7 +155,19 @@ defmodule Sdx32.Action.Volume do
     end
   end
 
-  defp update_settings(_settings, state, _cast) do
-    state
+  defp update_settings(settings, state) do
+    old_ip = state.ip
+    old_channel = state.channel
+
+    case parse_settings(settings) do
+      {:ok, ^old_ip, ^old_channel} ->
+        state
+
+      {:ok, new_ip, new_channel} ->
+        state |> subscribe_to_mixer(new_ip, new_channel)
+
+      :error ->
+        state
+    end
   end
 end
