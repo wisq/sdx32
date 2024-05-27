@@ -118,7 +118,9 @@ defmodule Sdx32.Action.Volume do
         state
 
       {:ok, new_ip, new_channel} ->
-        state |> subscribe_to_mixer(new_ip, new_channel)
+        state
+        |> subscribe_to_mixer(new_ip, new_channel)
+        |> set_feedback()
 
       :error ->
         state
@@ -164,7 +166,6 @@ defmodule Sdx32.Action.Volume do
         mute_state: nil,
         fader_state: nil
     }
-    |> set_feedback()
   end
 
   defp parse_settings(%{"mixer_ip" => ip, "channel" => channel} = settings) do

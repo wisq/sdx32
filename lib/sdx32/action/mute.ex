@@ -40,26 +40,12 @@ defmodule Sdx32.Action.Mute do
   @impl true
   def init({context, %{"settings" => settings}}) do
     with {:ok, ip, channel, set_to} <- parse_settings(settings) do
-      {:ok, %{session_name: mixer, watcher_name: watcher}} = Mixer.ensure_started(ip)
-
-      {:ok, sub} =
-        Subscription.start_link(
-          watcher: watcher,
-          tag: :mute,
-          command: &Mixing.muted?(&1, channel)
-        )
-
-      state = %State{
-        context: context,
-        mixer: mixer,
-        subscription: sub,
-        ip: ip,
-        channel: channel,
-        set_to: set_to
-      }
+      state =
+        %State{context: context, set_to: set_to}
+        |> subscribe_to_mixer(ip, channel)
 
       Logger.debug("starting with #{inspect(state)}")
-      {:consumer, state, subscribe_to: [sub]}
+      {:consumer, state}
     else
       _ ->
         {:consumer, %State{context: context}}
@@ -67,17 +53,11 @@ defmodule Sdx32.Action.Mute do
   end
 
   @impl true
-  def handle_cast({:action, event, %{"settings" => settings}} = cast, state) do
-    state = update_settings(settings, state, cast)
-
-    handle_action(event, state)
-    {:noreply, [], state}
-  end
-
-  @impl true
-  def handle_cast({:action, event, _}, state) do
-    Logger.debug("[#{self() |> inspect()}] Non-matching #{inspect(event)} frame")
-    {:noreply, [], state}
+  def handle_cast({:action, event, payload}, state) do
+    case handle_action(event, payload, state) do
+      %State{} = new_state -> {:noreply, [], new_state}
+      _ -> {:noreply, [], state}
+    end
   end
 
   @impl true
@@ -92,15 +72,15 @@ defmodule Sdx32.Action.Mute do
     end)
   end
 
-  defp handle_action("keyDown", %State{set_to: :mute} = state) do
+  defp handle_action("keyDown", _, %State{set_to: :mute} = state) do
     Mixing.mute(state.mixer, state.channel)
   end
 
-  defp handle_action("keyDown", %State{set_to: :unmute} = state) do
+  defp handle_action("keyDown", _, %State{set_to: :unmute} = state) do
     Mixing.unmute(state.mixer, state.channel)
   end
 
-  defp handle_action("keyDown", %State{set_to: :toggle} = state) do
+  defp handle_action("keyDown", _, %State{set_to: :toggle} = state) do
     case state.mute_state do
       :muted -> Mixing.unmute(state.mixer, state.channel)
       :unmuted -> Mixing.mute(state.mixer, state.channel)
@@ -108,18 +88,60 @@ defmodule Sdx32.Action.Mute do
     end
   end
 
-  defp handle_action("keyUp", %State{} = state) do
+  defp handle_action("keyUp", _, %State{} = state) do
     set_button_state(state.mute_state, state.context)
-    {:noreply, [], state}
   end
 
-  defp handle_action(event, state) do
-    Logger.debug("[#{self() |> inspect()}] Unhandled #{inspect(event)} frame")
-    {:noreply, state}
+  defp handle_action("didReceiveSettings", %{"settings" => settings}, state) do
+    old_ip = state.ip
+    old_channel = state.channel
+
+    case parse_settings(settings) do
+      {:ok, ^old_ip, ^old_channel, set_to} ->
+        %State{state | set_to: set_to}
+
+      {:ok, new_ip, new_channel, set_to} ->
+        %State{state | set_to: set_to}
+        |> subscribe_to_mixer(new_ip, new_channel)
+
+      :error ->
+        state
+    end
+  end
+
+  defp handle_action(action, payload, _state) do
+    IO.inspect(payload, label: action)
   end
 
   defp set_button_state(button_state, context) do
     Event.send("setState", context, %{state: Map.fetch!(@button_states, button_state)})
+  end
+
+  defp subscribe_to_mixer(state, ip, channel) do
+    if state.subscription, do: GenStage.stop(state.subscription)
+
+    {:ok, %{session_name: mixer, watcher_name: watcher}} = Mixer.ensure_started(ip)
+
+    {:ok, sub} =
+      Subscription.start_link(
+        watcher: watcher,
+        tag: :mute,
+        command: &Mixing.muted?(&1, channel)
+      )
+      |> IO.inspect()
+
+    GenStage.async_subscribe(self(), to: sub, cancel: :transient)
+
+    # Reset states here and wait for the subscription refresh.
+    # If we don't get a refresh, it's because there's no mixer at that IP.
+    %State{
+      state
+      | ip: ip,
+        channel: channel,
+        mixer: mixer,
+        subscription: sub,
+        mute_state: nil
+    }
   end
 
   defp parse_settings(%{"mixer_ip" => ip, "channel" => channel, "set" => set} = settings) do
@@ -137,9 +159,5 @@ defmodule Sdx32.Action.Mute do
   defp parse_settings(settings) do
     Logger.warning("Invalid settings: #{inspect(settings)}")
     :error
-  end
-
-  defp update_settings(_settings, state, _cast) do
-    state
   end
 end
