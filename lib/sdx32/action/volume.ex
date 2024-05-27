@@ -47,17 +47,11 @@ defmodule Sdx32.Action.Volume do
   end
 
   @impl true
-  def handle_cast({:action, event, %{"settings" => settings} = payload}, state) do
-    state = update_settings(settings, state)
-
-    handle_action(event, payload, state)
-    {:noreply, [], state}
-  end
-
-  @impl true
-  def handle_cast({:action, event, _}, state) do
-    Logger.debug("[#{self() |> inspect()}] Non-matching #{inspect(event)} frame")
-    {:noreply, [], state}
+  def handle_cast({:action, event, payload}, state) do
+    case handle_action(event, payload, state) do
+      %State{} = new_state -> {:noreply, [], new_state}
+      _ -> {:noreply, [], state}
+    end
   end
 
   @impl true
@@ -90,7 +84,10 @@ defmodule Sdx32.Action.Volume do
     state
   end
 
-  defp set_feedback(state), do: state
+  defp set_feedback(%State{} = state) do
+    Event.send("setFeedback", state.context, %{value: "not found", indicator: %{value: 0}})
+    state
+  end
 
   defp handle_action("dialRotate", %{"ticks" => ticks}, state) do
     case state.fader_state do
@@ -110,6 +107,22 @@ defmodule Sdx32.Action.Volume do
 
   defp handle_action("touchTap", %{"hold" => true}, state) do
     Mixing.set_fader(state.mixer, state.channel, 0.0)
+  end
+
+  defp handle_action("didReceiveSettings", %{"settings" => settings}, state) do
+    old_ip = state.ip
+    old_channel = state.channel
+
+    case parse_settings(settings) do
+      {:ok, ^old_ip, ^old_channel} ->
+        state
+
+      {:ok, new_ip, new_channel} ->
+        state |> subscribe_to_mixer(new_ip, new_channel)
+
+      :error ->
+        state
+    end
   end
 
   defp handle_action(action, payload, _state) do
@@ -140,8 +153,18 @@ defmodule Sdx32.Action.Volume do
         sub
       end)
 
-    %State{state | ip: ip, channel: channel, mixer: mixer, subscriptions: subs}
-    |> IO.inspect()
+    # Reset states here and wait for the subscription refresh.
+    # If we don't get a refresh, it's because there's no mixer at that IP.
+    %State{
+      state
+      | ip: ip,
+        channel: channel,
+        mixer: mixer,
+        subscriptions: subs,
+        mute_state: nil,
+        fader_state: nil
+    }
+    |> set_feedback()
   end
 
   defp parse_settings(%{"mixer_ip" => ip, "channel" => channel} = settings) do
@@ -152,22 +175,6 @@ defmodule Sdx32.Action.Volume do
       rval ->
         Logger.warning("Invalid settings: #{inspect(settings)}, got #{inspect(rval)}")
         :error
-    end
-  end
-
-  defp update_settings(settings, state) do
-    old_ip = state.ip
-    old_channel = state.channel
-
-    case parse_settings(settings) do
-      {:ok, ^old_ip, ^old_channel} ->
-        state
-
-      {:ok, new_ip, new_channel} ->
-        state |> subscribe_to_mixer(new_ip, new_channel)
-
-      :error ->
-        state
     end
   end
 end

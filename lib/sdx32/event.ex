@@ -37,6 +37,14 @@ defmodule Sdx32.Event do
     Action.cast_event(action, context, event, payload)
   end
 
+  def handle_event(%{
+        "action" => action,
+        "context" => context,
+        "event" => event
+      }) do
+    Action.cast_event(action, context, event, nil)
+  end
+
   def handle_event(%{} = event) do
     Logger.debug("Unhandled event:\n#{inspect(event, pretty: true)}")
   end
