@@ -2,7 +2,7 @@
   "SDKVersion": 2,
   "Author": "Adrian Irving-Beer",
   "CodePath": "dev.sh",
-  "Description": "Example description",
+  "Description": "Control an X32 mixing console",
   "Name": "SDX32",
   "Icon": "actions/template/assets/action",
   "URL": "https://github.com/wisq/sdx32",

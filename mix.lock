@@ -1,7 +1,7 @@
 %{
-  "ex_osc": {:hex, :ex_osc, "0.1.2", "15db1b9a767511e00cb259ea406c878c6fd7751a06e1e38f929cc314e327806d", [:mix], [{:gen_stage, "~> 1.2.1", [hex: :gen_stage, repo: "hexpm", optional: false]}], "hexpm", "323e3edab3d9d140001f505a10028a70df0733ab468b98d415fc36bcccfa1758"},
+  "ex_osc": {:git, "https://github.com/wisq/ex_osc.git", "9c98de14b0df10634fe76662f8a5ce49e2acf50a", [tag: "9c98de14b0df10634fe76662f8a5ce49e2acf50a"]},
   "gen_stage": {:hex, :gen_stage, "1.2.1", "19d8b5e9a5996d813b8245338a28246307fd8b9c99d1237de199d21efc4c76a1", [:mix], [], "hexpm", "83e8be657fa05b992ffa6ac1e3af6d57aa50aace8f691fcf696ff02f8335b001"},
   "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
   "websockex": {:hex, :websockex, "0.4.3", "92b7905769c79c6480c02daacaca2ddd49de936d912976a4d3c923723b647bf0", [:mix], [], "hexpm", "95f2e7072b85a3a4cc385602d42115b73ce0b74a9121d0d6dbbf557645ac53e4"},
-  "x32_remote": {:hex, :x32_remote, "0.1.0", "9b22f4a68e54de458b0c2876d2579689404ea58c1d8925d820f2b39a9416b197", [:mix], [{:ex_osc, "~> 0.1.2", [hex: :ex_osc, repo: "hexpm", optional: false]}, {:gen_stage, "~> 1.2.1", [hex: :gen_stage, repo: "hexpm", optional: false]}], "hexpm", "ad26de4ca070013c3bb556eb5031b1d44ca336de35b54608b73efae8063c23ac"},
+  "x32_remote": {:git, "https://github.com/wisq/x32_remote.git", "89ec84594c27f417b4683a285271f120aa4e3a84", [tag: "89ec84594c27f417b4683a285271f120aa4e3a84"]},
 }

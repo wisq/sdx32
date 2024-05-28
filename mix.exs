@@ -8,7 +8,7 @@ defmodule Sdx32.MixProject do
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escripts: [main_module: Sdx32]
+      escript: [main_module: Sdx32]
     ]
   end
 
@@ -27,7 +27,7 @@ defmodule Sdx32.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:jason, "~> 1.4"},
       {:websockex, "~> 0.4.3"},
-      {:x32_remote, path: "../x32_remote"}
+      {:x32_remote, github: "wisq/x32_remote", tag: "89ec84594c27f417b4683a285271f120aa4e3a84"}
     ]
   end
 end
