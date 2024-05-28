@@ -12,6 +12,10 @@ defmodule Sdx32 do
     Supervisor.start_link(children, strategy: :one_for_one, name: Sdx32.Supervisor)
   end
 
+  def main(_) do
+    Process.sleep(:infinity)
+  end
+
   defp children(:none), do: []
 
   defp children({:file, file}) do
