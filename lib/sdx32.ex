@@ -12,7 +12,8 @@ defmodule Sdx32 do
     Supervisor.start_link(children, strategy: :one_for_one, name: Sdx32.Supervisor)
   end
 
-  def main(_) do
+  def run do
+    {:ok, _} = Application.ensure_all_started(:sdx32)
     Process.sleep(:infinity)
   end
 
@@ -24,9 +25,8 @@ defmodule Sdx32 do
     |> children_with_params()
   end
 
-  defp children(:argv) do
-    System.argv()
-    |> Parameters.from_args()
+  defp children(:environ) do
+    Parameters.from_environ()
     |> children_with_params()
   end
 

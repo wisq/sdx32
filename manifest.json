@@ -1,7 +1,8 @@
 {
   "SDKVersion": 2,
   "Author": "Adrian Irving-Beer",
-  "CodePath": "dev.sh",
+  "CodePathMac": "sdx32.sh",
+  "CodePathWin": "sdx32.bat",
   "Description": "Control an X32 mixing console",
   "Name": "SDX32",
   "Icon": "actions/template/assets/action",
