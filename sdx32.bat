@@ -19,9 +19,9 @@ goto parse_args
 
 :run
 
-if exist bin\sdx32.bat (
+if exist windows\bin\sdx32.bat (
 	rem Production / release mode.
-	bin\sdx32.bat eval Sdx32.run()
+	windows\bin\sdx32.bat eval Sdx32.run()
 ) else (
 	if exist mix.exs (
 		rem Development mode.  

@@ -27,9 +27,9 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-if [ -x bin/sdx32 ]; then
+if [ -x macos/bin/sdx32 ]; then
 	# Production / release mode.
-	exec bin/sdx32 eval 'Sdx32.run()'
+	exec macos/bin/sdx32 eval 'Sdx32.run()'
 elif [ -f mix.exs ]; then
 	# Development mode.  
 	# Write params to file, to be picked up by `iex -S mix` later.

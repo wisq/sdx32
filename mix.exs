@@ -20,28 +20,51 @@ defmodule Sdx32.MixProject do
     ]
   end
 
+  def cli do
+    [preferred_envs: [release: :prod]]
+  end
+
   defp releases do
     [
       sdx32: [
-        steps: [:assemble, &copy_extras/1]
+        include_executables_for: [platform_executables()],
+        steps: [:assemble, &copy_extras/1],
+        path: "release/net.wisq.sdx32.sdPlugin/#{platform()}"
       ]
     ]
+  end
+
+  defp platform do
+    case :os.type() do
+      {:unix, :darwin} -> :macos
+      {:win32, :nt} -> :windows
+      other -> raise "Unsupported OS: #{inspect(other)}"
+    end
+  end
+
+  defp platform_executables do
+    case platform() do
+      :macos -> :unix
+      :windows -> :windows
+    end
   end
 
   @copy_dirs ["html", "icons"]
   @copy_files ["manifest.json", "sdx32.sh", "sdx32.bat"]
 
   defp copy_extras(rel) do
+    parent = Path.dirname(rel.path)
+
     @copy_dirs
     |> Enum.each(fn dir ->
       IO.puts("Copying directory: #{dir}")
-      File.cp_r!(dir, Path.join(rel.path, dir))
+      File.cp_r!(dir, Path.join(parent, dir))
     end)
 
     @copy_files
     |> Enum.each(fn file ->
       IO.puts("Copying file: #{file}")
-      File.cp!(file, Path.join(rel.path, file))
+      File.cp!(file, Path.join(parent, file))
     end)
 
     rel

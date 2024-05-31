@@ -24,7 +24,9 @@ sdx32-*.tar
 
 # Development mode files:
 dev.json
-dev.log
+
+# `mix release`
+/release/
 
 # Temporary files, for example, from tests.
 /tmp/
