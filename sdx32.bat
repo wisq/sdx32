@@ -4,10 +4,10 @@ set script=%0
 
 :parse_args
 if "%1"=="" goto run
-if "%1"=="-port" (set SDX32_PORT=%2&& goto next_arg)
-if "%1"=="-pluginUUID" (set SDX32_PLUGIN_UUID=%2&& goto next_arg)
-if "%1"=="-registerEvent" (set SDX32_REGISTER_EVENT=%2&& goto next_arg)
-if "%1"=="-info" (set SDX32_INFO=%2&& goto next_arg)
+if "%1"=="-port" (set SDX32_PORT=%~2&& goto next_arg)
+if "%1"=="-pluginUUID" (set SDX32_PLUGIN_UUID=%~2&& goto next_arg)
+if "%1"=="-registerEvent" (set SDX32_REGISTER_EVENT=%~2&& goto next_arg)
+if "%1"=="-info" (set SDX32_INFO=%*&& goto run)
 
 echo "Unknown argument: %1"
 exit /B 1
