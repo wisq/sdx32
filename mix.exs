@@ -7,7 +7,8 @@ defmodule Sdx32.MixProject do
       version: "0.1.0",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -17,6 +18,33 @@ defmodule Sdx32.MixProject do
       mod: {Sdx32, []},
       extra_applications: [:logger]
     ]
+  end
+
+  defp releases do
+    [
+      sdx32: [
+        steps: [:assemble, &copy_extras/1]
+      ]
+    ]
+  end
+
+  @copy_dirs ["html", "icons"]
+  @copy_files ["manifest.json", "sdx32.sh", "sdx32.bat"]
+
+  defp copy_extras(rel) do
+    @copy_dirs
+    |> Enum.each(fn dir ->
+      IO.puts("Copying directory: #{dir}")
+      File.cp_r!(dir, Path.join(rel.path, dir))
+    end)
+
+    @copy_files
+    |> Enum.each(fn file ->
+      IO.puts("Copying file: #{file}")
+      File.cp!(file, Path.join(rel.path, file))
+    end)
+
+    rel
   end
 
   # Run "mix help deps" to learn about dependencies.
