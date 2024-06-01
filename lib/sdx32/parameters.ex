@@ -2,14 +2,11 @@ defmodule Sdx32.Parameters do
   @enforce_keys [:port, :plugin_uuid, :register_event, :info]
   defstruct(@enforce_keys)
 
-  def from_environ(env \\ System.get_env()) do
-    %{
-      port: fetch_env(env, "PORT", &String.to_integer/1),
-      plugin_uuid: fetch_env(env, "PLUGIN_UUID"),
-      register_event: fetch_env(env, "REGISTER_EVENT"),
-      info: fetch_env(env, "INFO", &Jason.decode!/1)
-    }
-    |> Map.reject(fn {_key, value} -> is_nil(value) end)
+  alias Sdx32.Parameters.ArgsFromEnv
+
+  def from_args(args) do
+    args
+    |> parse_args()
     |> then(&struct!(__MODULE__, &1))
   end
 
@@ -26,17 +23,31 @@ defmodule Sdx32.Parameters do
     |> then(&struct!(__MODULE__, &1))
   end
 
-  defp fetch_env(env, name, parser \\ &Function.identity/1) do
-    key = "SDX32_#{name}"
-
-    with {:ok, value} <- Map.fetch(env, key) do
-      try do
-        parser.(value)
-      rescue
-        err -> raise "Error parsing #{key}:\n\n#{Exception.message(err)}"
-      end
-    else
-      :error -> nil
-    end
+  defp parse_args(["-port", port | rest]) do
+    parse_args(rest)
+    |> Map.put(:port, String.to_integer(port))
   end
+
+  defp parse_args(["-pluginUUID", uuid | rest]) do
+    parse_args(rest)
+    |> Map.put(:plugin_uuid, uuid)
+  end
+
+  defp parse_args(["-registerEvent", event | rest]) do
+    parse_args(rest)
+    |> Map.put(:register_event, event)
+  end
+
+  defp parse_args(["-info", json | rest]) do
+    parse_args(rest)
+    |> Map.put(:info, Jason.decode!(json))
+  end
+
+  defp parse_args(["-argsFromEnv", env_var]) do
+    System.get_env(env_var)
+    |> ArgsFromEnv.parse()
+    |> parse_args()
+  end
+
+  defp parse_args([]), do: %{}
 end

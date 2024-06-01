@@ -8,7 +8,7 @@ defmodule Sdx32 do
 
   def start(_type, _args) do
     children = children(@params_from)
-    Logger.info("Sdx32 starting ...")
+    Enum.empty?(children) || Logger.info("Sdx32 starting ...")
     Supervisor.start_link(children, strategy: :one_for_one, name: Sdx32.Supervisor)
   end
 
@@ -25,8 +25,9 @@ defmodule Sdx32 do
     |> children_with_params()
   end
 
-  defp children(:environ) do
-    Parameters.from_environ()
+  defp children(:argv) do
+    System.argv()
+    |> Parameters.from_args()
     |> children_with_params()
   end
 

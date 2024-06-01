@@ -5,8 +5,9 @@ defmodule Mix.Tasks.Sdx32.Dev do
 
   @params_file "dev.json"
 
-  def run(_) do
-    Parameters.from_environ()
+  def run(args) do
+    args
+    |> Parameters.from_args()
     |> Parameters.to_json()
     |> then(&File.write!(@params_file, &1))
 
