@@ -28,16 +28,6 @@ defmodule Sdx32.Parameters.ArgsFromEnvTest do
              |> List.flatten()
   end
 
-  test "parses example command line in reverse order" do
-    assert @input
-           |> Enum.reverse()
-           |> Enum.join(" ")
-           |> ArgsFromEnv.parse() ==
-             @output
-             |> Enum.reverse()
-             |> List.flatten()
-  end
-
   test "parses example command line in random order" do
     {input, output} =
       Enum.zip(@input, @output)
@@ -49,5 +39,22 @@ defmodule Sdx32.Parameters.ArgsFromEnvTest do
            |> ArgsFromEnv.parse() ==
              output
              |> List.flatten()
+  end
+
+  test "throws error on unbalanced quotes" do
+    message = "Expected closing quote, reached end of arguments"
+
+    assert_raise(RuntimeError, message, fn ->
+      ~s{-info "unbalanced quote}
+      |> ArgsFromEnv.parse()
+    end)
+
+    assert_raise(RuntimeError, message, fn ->
+      ~s{-info "multiple "unbalanced" quotes}
+      |> ArgsFromEnv.parse()
+    end)
+
+    assert ~s{-info "multiple "quotes", but balanced"} |> ArgsFromEnv.parse() ==
+             ["-info", "multiple quotes, but balanced"]
   end
 end

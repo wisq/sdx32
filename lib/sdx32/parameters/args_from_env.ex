@@ -40,6 +40,7 @@ defmodule Sdx32.Parameters.ArgsFromEnv do
         end
 
       nil ->
+        if in_quote, do: raise("Expected closing quote, reached end of arguments")
         {[argstr], nil}
     end
   end
